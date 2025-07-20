@@ -1,6 +1,6 @@
 class PasswordsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_password, only: [:edit, :update, :destroy]
+  before_action :set_password, except: [:index, :new, :create]
 
   def index
     @passwords = current_user.passwords
@@ -11,13 +11,28 @@ class PasswordsController < ApplicationController
   end
 
   def create
-    @password = current_user.passwords.build(password_params)
+    # Primero creamos el Password
+    @password = Password.new(password_params)
+    @password.username = current_user.email if @password.username.blank?
 
-    if @password.save
-      redirect_to passwords_path, notice: 'Password was successfully created.'
-    else
-      render :new, status: :unprocessable_entity
+    # Iniciamos una transacción para asegurar que todo se guarde correctamente
+    Password.transaction do
+      if @password.save
+        # Ahora creamos la asociación explícitamente
+        UserPassword.create!(user: current_user, password: @password)
+        redirect_to passwords_path, notice: 'Password was successfully created.'
+      else
+        render :new, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
+      end
     end
+  end
+
+  def show
+    @password = current_user.passwords.find(params[:id])
+    # Aquí podrías agregar lógica para mostrar detalles de la contraseña
+    # pero por ahora, simplemente redirigimos a la lista de contraseñas.
+    redirect_to passwords_path, notice: 'Password details are not available.'
   end
 
   def edit

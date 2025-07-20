@@ -25,10 +25,8 @@
       <%= f.text_field :service_url, class: "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
     </div>
     
-    <div class="space-y-2">
-      <%= f.label :username, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.text_field :username, class: "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
-    </div>
+    <% # El campo username se establece automáticamente en el controlador %>
+    <%= f.hidden_field :username, value: current_user.email %>
 
     <div class="space-y-2">
       <%= f.label :password_digest, "Password", class: "block text-sm font-medium text-gray-700" %>
