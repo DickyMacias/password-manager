@@ -1,7 +1,9 @@
 <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Add New Password</h1>
 
-<div class="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
-  <%= form_with(model: @password, html: { class: "space-y-6" }) do |f| %>
+<div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="md:col-span-2">
+    <div class="bg-white p-8 rounded-lg shadow-md">
+      <%= form_with(model: @password, html: { class: "space-y-6" }) do |f| %>
     <% if @password.errors.any? %>
       <div class="bg-red-50 text-red-700 p-4 rounded-md mb-6 border-l-4 border-red-500">
         <h2 class="text-lg font-medium mb-2">
@@ -43,4 +45,10 @@
       <%= f.submit "Save Password", class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
     </div>
   <% end %>
+    </div>
+  </div>
+  
+  <div class="md:col-span-1">
+    <%= render 'password_generator' %>
+  </div>
 </div>

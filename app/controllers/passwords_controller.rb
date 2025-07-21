@@ -3,7 +3,26 @@ class PasswordsController < ApplicationController
   before_action :set_password, except: [:index, :new, :create]
 
   def index
-    @passwords = current_user.passwords
+    # First get all the user's passwords
+    passwords = current_user.passwords
+
+    # If there's a search term, filter in memory
+    if params[:search].present?
+      search_term = params[:search].strip.downcase
+      @passwords = passwords.select do |password|
+        [password.website, password.service_url, password.username].compact.any? do |field|
+          field.downcase.include?(search_term)
+        end
+      end
+    else
+      @passwords = passwords
+    end
+
+    # For AJAX requests, only render the results partial
+    respond_to do |format|
+      format.html
+      format.turbo_stream { render turbo_stream: turbo_stream.replace("password_results", partial: "passwords/password_list") }
+    end
   end
 
   def new
@@ -11,14 +30,14 @@ class PasswordsController < ApplicationController
   end
 
   def create
-    # Primero creamos el Password
+    # First create the Password
     @password = Password.new(password_params)
     @password.username = current_user.email if @password.username.blank?
 
-    # Iniciamos una transacción para asegurar que todo se guarde correctamente
+    # Start a transaction to ensure everything is saved correctly
     Password.transaction do
       if @password.save
-        # Ahora creamos la asociación explícitamente
+        # Now we create the association explicitly
         UserPassword.create!(user: current_user, password: @password)
         redirect_to passwords_path, notice: 'Password was successfully created.'
       else
@@ -30,8 +49,8 @@ class PasswordsController < ApplicationController
 
   def show
     @password = current_user.passwords.find(params[:id])
-    # Aquí podrías agregar lógica para mostrar detalles de la contraseña
-    # pero por ahora, simplemente redirigimos a la lista de contraseñas.
+    # Here you could add logic to show password details,
+    # but for now, we simply redirect to the password list.
     redirect_to passwords_path, notice: 'Password details are not available.'
   end
 
